@@ -31,5 +31,5 @@ export async function answerQuestion(message, history = []) {
   })
   const reply = completion.choices[0]?.message?.content?.trim()
   if (!reply) throw new Error('The AI provider returned an empty response.')
-  return { reply, source: 'openai' }
+  return { reply, source: 'openai', model: process.env.OPENAI_MODEL || 'gpt-4o-mini' }
 }

@@ -1,0 +1,53 @@
+EduMentor AI Workshop 5.3 local verification
+Date: 2026-10-04
+Environment: Windows / PowerShell 5.1; Node.js v22.23.2; npm 10.9.8
+
+Live service startup (separate VS Code terminals)
+Frontend command: npm run dev --workspace frontend
+Observed Vite URL: http://localhost:5173/
+Backend command: npm run dev --workspace backend
+Observed API URL: http://localhost:4000/
+Observed backend startup line: MONGODB_URI is not set; using in-memory demo data.
+Observed backend startup line: EduMentor API listening on http://localhost:4000
+
+Live HTTP checks
+Frontend HTTP: 200
+Frontend page title present: true
+Direct API health: {"status":"ok","database":"demo","ai":"guided-fallback"}
+Vite /api proxy health database field: demo
+
+Secret presence checks (values were never read or printed)
+backend/.env present: false
+root .env present: false
+process MONGODB_URI set: false
+process OPENAI_API_KEY set: false
+Local MongoDB service/binary: not installed or not registered / absent
+Real MongoDB ping: NOT RUN; MONGODB_URI was absent
+
+Controlled Mongo failure test (isolated port 4001; loopback-only unreachable endpoint)
+Observed sanitized line: MongoDB verification failed (MongooseServerSelectionError); using in-memory demo data. Check backend/.env privately and confirm database network access.
+Health database field: unavailable
+Dashboard database field: demo
+Temporary failure-test server: stopped after verification
+
+Synthetic assessment process-restart check
+Before restart: assessment title=WS5.3 synthetic evidence check; topic=Probability; score=37; health database=demo
+After restart: assessment found=false; health database=demo; course progress reset to 68
+Conclusion: the in-memory assessment was not persistent; MongoDB acceptance check did not pass.
+
+Final progress workflow in demo mode
+Before lesson action: course progress=68
+After lesson action: course progress=76
+GET /api/progress: HTTP 200; completed progress entries=3
+
+AI verification
+OpenAI SDK: 4.104.0; backend uses OpenAI Chat Completions; configured default model name: gpt-4o-mini
+Real OPENAI_API_KEY present: false; real model request: NOT RUN
+Tutor UI/API response: HTTP 200; source=guided-fallback; model-generated=false
+Local mock-provider failure: mock returned 503; API returned safe HTTP 502; frontend displayed a connection error and Retry action
+
+Code/test checks
+npm test: 10 passed, 0 failed
+npm run lint: passed
+npm run build: passed
+VS Code diagnostics on edited backend files: no errors

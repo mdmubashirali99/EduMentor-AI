@@ -12,7 +12,13 @@ app.use((error, _request, response, _next) => {
   if (error instanceof ZodError) {
     return response.status(400).json({ error: 'Please check your input.', details: error.issues.map(({ path, message }) => ({ field: path.join('.'), message })) })
   }
-  console.error(error)
+  if (error instanceof SyntaxError && error.status === 400 && Object.hasOwn(error, 'body')) {
+    return response.status(400).json({ error: 'Request body contains invalid JSON.' })
+  }
+  if (error.status === 413) {
+    return response.status(413).json({ error: 'Request body is too large.' })
+  }
+  console.error(`Request failed (${error.name || 'Error'}).`)
   return response.status(500).json({ error: 'Something went wrong. Please try again.' })
 })
 

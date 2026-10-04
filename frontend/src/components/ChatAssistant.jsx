@@ -34,7 +34,7 @@ export default function ChatAssistant({ open, onClose }) {
     setBusy(true)
     try {
       const result = await api.chat(message, history)
-      setMessages((current) => [...current, { role: 'assistant', content: result.reply }])
+      setMessages((current) => [...current, { role: 'assistant', content: result.reply, source: result.source, model: result.model }])
     } catch {
       setError('Could not reach the assistant. Check your connection and try again.')
     } finally {
@@ -58,7 +58,12 @@ export default function ChatAssistant({ open, onClose }) {
           {messages.map((message, index) => (
             <div className={`message-row ${message.role}`} key={`${message.role}-${index}`}>
               {message.role === 'assistant' && <span className="message-avatar"><Sparkles size={13} /></span>}
-              <p>{message.content}</p>
+              {message.role === 'assistant' ? (
+                <div className="assistant-message-content">
+                  <p>{message.content}</p>
+                  {message.source && <span className="message-source">{message.source === 'openai' ? `OpenAI · ${message.model}` : 'Guided fallback · not model-generated'}</span>}
+                </div>
+              ) : <p>{message.content}</p>}
             </div>
           ))}
           {busy && <div className="message-row assistant"><span className="message-avatar"><Sparkles size={13} /></span><p className="typing"><i /><i /><i /></p></div>}

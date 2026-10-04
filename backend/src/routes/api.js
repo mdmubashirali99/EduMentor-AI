@@ -4,6 +4,7 @@ import { answerQuestion } from '../services/tutor.js'
 import { createRecommendations } from '../services/analysis.js'
 import {
   completeLesson,
+  getDatabaseStatus,
   getDashboard,
   getProfile,
   createAssessment,
@@ -31,7 +32,7 @@ const assessmentSchema = z.object({
 })
 
 router.get('/health', (_request, response) => {
-  response.json({ status: 'ok', database: process.env.MONGODB_URI ? 'configured' : 'demo', ai: process.env.OPENAI_API_KEY ? 'configured' : 'guided-fallback' })
+  response.json({ status: 'ok', database: getDatabaseStatus(), ai: process.env.OPENAI_API_KEY ? 'configured' : 'guided-fallback' })
 })
 
 router.get('/dashboard', async (_request, response) => {

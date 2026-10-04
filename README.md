@@ -11,9 +11,43 @@ npm install
 npm run dev
 ```
 
-Open the Vite URL printed in the terminal (normally `http://localhost:5173`). The Express API runs at `http://localhost:4000`; Vite proxies `/api` requests to it. The app starts with sample student data and a guided tutoring fallback, so MongoDB and an AI key are optional for local development.
+The frontend normally starts at `http://localhost:5173`; Vite proxies `/api` requests to the Express API at `http://localhost:4000`. If a port is occupied, use the actual URL printed by Vite. To keep service logs in separate terminals, run:
 
-To use MongoDB and the OpenAI tutoring provider, copy `backend/.env.example` to `backend/.env`, then set `MONGODB_URI` and `OPENAI_API_KEY`. The backend seeds an example student, courses, assessments, progress, and recommendations when it first connects. The tutoring model can be changed with `OPENAI_MODEL`.
+```bash
+npm run dev --workspace backend
+npm run dev --workspace frontend
+```
+
+For a production preview, build first and then start both services:
+
+```bash
+npm run build
+npm start
+```
+
+The frontend preview normally uses `http://localhost:4173`; the API remains on port `4000`.
+
+## Environment Configuration
+
+The backend loads `backend/.env` through `dotenv/config`. To create a private local file in PowerShell:
+
+```powershell
+Copy-Item backend/.env.example backend/.env
+```
+
+Set these names privately; do not paste values into reports, screenshots, chat, or frontend variables:
+
+- `PORT`
+- `CLIENT_ORIGIN`
+- `MONGODB_URI`
+- `OPENAI_API_KEY`
+- `OPENAI_MODEL`
+
+For MongoDB Atlas, create a database deployment and database user, allow the development machine's IP in the network access list, and place the connection URI in `backend/.env`. Keep `.env` closed when capturing evidence; it is excluded by `.gitignore`.
+
+On startup, the backend connects to MongoDB, sends an administrative ping, and only then seeds data and logs `MongoDB connection verified (ping: ok)`. `/api/health` reports `database: verified`, `demo`, `connecting`, or `unavailable`. Without `MONGODB_URI`, data is in-memory only and is lost on backend restart. Do not treat demo data as persistent.
+
+The AI client is server-side OpenAI Chat Completions using `OPENAI_MODEL` (default `gpt-4o-mini`). With `OPENAI_API_KEY` configured, API responses identify `source: openai` and include the model name. Without the key, the app returns a guided fallback labeled `source: guided-fallback`; it is not a model response. Recommendations and knowledge-gap classifications are deterministic rules based on assessment averages, not model-generated recommendations.
 
 ## Project Layout
 
@@ -41,9 +75,9 @@ frontend/
 - Student overview with study time, streak, completed lessons, weekly goal, activity, and course progress.
 - Course library with search and interactive lesson completion.
 - Assessment endpoints and topic-level analysis that highlights focus areas and strengths.
-- Personalized practice recommendations generated from assessment averages.
-- AI tutoring through OpenAI Chat Completions, with a guided local fallback when no API key is configured.
-- MongoDB persistence with a graceful in-memory sample-data mode when MongoDB is absent.
+- Assessment-average-based practice recommendations and knowledge-gap analysis using deterministic rules.
+- AI tutoring through the backend OpenAI Chat Completions client, with clearly labeled guided fallback replies when no key is configured.
+- MongoDB persistence after connection and successful ping; otherwise, clearly reported in-memory demo data.
 - Input validation with Zod, request-size limits, configurable CORS, user-safe error responses, and loading/empty/error states.
 
 ## API
@@ -70,8 +104,8 @@ npm run lint
 npm run build
 ```
 
-The backend uses Node's built-in test runner for learning analysis, HTTP behavior, validation, progress updates, and tutoring fallback. The frontend is linted with Oxlint and production-built with Vite.
+The backend uses Node's built-in test runner for learning analysis, HTTP behavior, validation, progress updates, fallback tutoring, and a localhost-only mocked provider failure. The frontend is linted with Oxlint and production-built with Vite. Functional test results are not learning-quality or AI-accuracy measurements. See [`evidence/test-results.md`](evidence/test-results.md) for the dated test matrix and [`evidence/development-summary.md`](evidence/development-summary.md) for verified findings and evidence captions.
 
 ## Production Notes
 
-This project uses a seeded demo learner to keep the prototype immediately usable. It does not include account authentication, authorization, instructor workflows, or production student-data controls. Add those before deployment with real learner information; keep database and AI secrets on the server and configure a trusted `CLIENT_ORIGIN`.
+This project uses a seeded demo learner to keep the prototype immediately usable. It does not include account authentication, protected routes, authorization, instructor workflows, or production student-data controls. The current development environment has no `MONGODB_URI` or `OPENAI_API_KEY`, so database persistence and a real OpenAI response are not verified. Add those privately before production use. Keep secrets server-side and configure a trusted `CLIENT_ORIGIN`.

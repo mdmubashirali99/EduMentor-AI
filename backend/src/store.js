@@ -15,9 +15,18 @@ import { analyzeLearning } from './services/analysis.js'
 
 const demoCompletedLessons = new Set(['statistics-foundations:probability-basics', 'calculus-ii:limits-continuity'])
 const email = demoProfile.email
+let databaseStatus = 'demo'
 
 export function isDatabaseConnected() {
   return User.db.readyState === 1
+}
+
+export function setDatabaseStatus(status) {
+  databaseStatus = status
+}
+
+export function getDatabaseStatus() {
+  return databaseStatus
 }
 
 export async function seedDatabase() {
